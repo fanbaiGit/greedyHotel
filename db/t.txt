@@ -1,0 +1,97 @@
+@startuml
+空调管理员 -> a.AirController: 1:powerOn(parameters)
+activate a.AirController
+a.AirController -> a.AirScheduler:1.1:create()
+a.AirController -> a.AirService:1.2:create()
+a.AirController -> a.Timer:1.3:create()
+
+a.AirController -> a.AirScheduler:2.1:SetParams(parameters.y = 3)
+activate a.AirScheduler
+a.AirScheduler --> a.AirController:2.2:SetParams(parameters.y = 3)
+deactivate a.AirScheduler
+
+a.AirController -> a.AirService:2.2:SetParams(parameters.rate = [3,2,1], defaultTemper = 26, mode = [0,1], TemperRange = [-8,4])
+activate a.AirService
+a.AirService --> a.AirController:2.3:SetParams(parameters.rate = [3,2,1], defaultTemper = 26, mode = [0,1], TemperRange = [-8,4])
+deactivate a.AirService
+a.AirController -> a.AirScheduler:2.4:SetParams(parameters.overtime = 60)
+activate a.AirScheduler
+a.AirScheduler --> a.AirController:2.5:SetParams(parameters.overtime = 60)
+deactivate a.AirScheduler
+
+a.AirController -> r.Roomservice:2.6:update(event,record)
+
+r.Roomservice->dBFacade:2.6.1:update(event,record)
+ activate dBFacade
+ dBFacade-->r.Roomservice:2.6.2:update(event,record)
+ deactivate dBFacade
+
+
+dBFacade -> dBFacade:2.6.3:getMapper
+activate dBFacade
+dBFacade --> dBFacade:2.6.4:getMapper
+deactivate dBFacade
+
+
+dBFacade -> r.RoomBean:2.6.5:update(event,record)
+activate r.RoomBean
+r.RoomBean --> dBFacade:2.6.6:update(event,record)
+deactivate r.RoomBean
+
+r.Roomservice ->a.AirController :2.7:update(event,record)
+
+loop
+ a.AirScheduler->dBFacade:2.8:update(event,record)
+ activate dBFacade
+ dBFacade-->a.AirScheduler:2.9:update(event,record)
+ deactivate dBFacade
+ 
+ a.AirService->dBFacade:2.10:update(event,record)
+ activate dBFacade
+ dBFacade-->a.AirService:2.11:update(event,record)
+ deactivate dBFacade
+
+
+dBFacade -> dBFacade:2.12:getMapper
+activate dBFacade
+dBFacade --> dBFacade:2.13:getMapper
+deactivate dBFacade
+
+
+dBFacade -> a.LogBean:2.14:update(event,record)
+activate a.LogBean
+a.LogBean --> dBFacade:2.15:update(event,record)
+deactivate a.LogBean
+end
+
+a.AirController --> 空调管理员: 3:powerOn(parameters)
+deactivate a.AirController
+@enduml
+
+
+
+@startuml
+loop
+空调管理员 -> m.QueryController: 1:MakeNewQuery()
+activate  m.QueryController
+
+m.QueryController->dBFacade:2.1:gets("all",record)
+activate dBFacade
+dBFacade->m.QueryController:2.2:gets("all",record)
+deactivate dBFacade
+
+dBFacade -> dBFacade:2.3:getMapper
+activate dBFacade
+dBFacade -> dBFacade:2.4:getMapper
+deactivate dBFacade
+
+dBFacade -> a.LogBean:2.5:gets("all",record)
+activate dBFacade
+a.LogBean -> dBFacade:2.6:gets("all",record)
+deactivate dBFacade
+
+m.QueryController -> 空调管理员: 3:MakeNewQuery()
+deactivate  m.QueryController
+
+end
+@enduml 
