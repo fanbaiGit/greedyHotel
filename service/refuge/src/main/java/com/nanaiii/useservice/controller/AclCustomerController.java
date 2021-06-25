@@ -25,7 +25,7 @@ import java.util.List;
  * @since 2021-05-24
  */
 @RestController
-@RequestMapping("/customer")
+@RequestMapping("/useservice/customer")
 @CrossOrigin
 public class AclCustomerController {
 
@@ -135,6 +135,8 @@ public class AclCustomerController {
         // 先停止上一次送风服务再请求开启下一次服务
         Log log1 = new Log(room_id,0,null);
         room.setState(0);
+        roomService.update(room,wrapper);
+        logService.save(log1);
 
         // TODO 此处需要优先级调度
         Boolean isOk = roomService.isOk(room_id,wind_speed);

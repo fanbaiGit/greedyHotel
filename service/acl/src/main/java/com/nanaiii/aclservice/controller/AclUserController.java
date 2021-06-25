@@ -43,14 +43,7 @@ public class AclUserController {
 
     @ApiOperation(value = "获取管理用户分页列表")
     @GetMapping("{page}/{limit}")
-    public R index(
-//            @ApiParam(name = "page", value = "当前页码", required = true)
-//            @PathVariable Long page,
-//
-//            @ApiParam(name = "limit", value = "每页记录数", required = true)
-//            @PathVariable Long limit,
-
-            @ApiParam(name = "courseQuery", value = "查询对象", required = false)
+    public R index( @ApiParam(name = "courseQuery", value = "查询对象", required = false)
                     AclUser userQueryVo) {
         Page<AclUser> pageParam = new Page<>(1, 10);
         QueryWrapper<AclUser> wrapper = new QueryWrapper<>();

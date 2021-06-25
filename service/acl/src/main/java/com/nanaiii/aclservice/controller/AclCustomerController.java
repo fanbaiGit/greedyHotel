@@ -1,20 +1,15 @@
 package com.nanaiii.aclservice.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.nanaiii.aclservice.service.AclCustomerService;
-import com.nanaiii.commonutils.JwtUtils;
 import com.nanaiii.commonutils.R;
 import com.nanaiii.aclservice.entity.AclCustomer;
-import com.nanaiii.aclservice.entity.vo.RegisterVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
 
 /**
  * <p>
@@ -31,12 +26,6 @@ public class AclCustomerController {
 
     @Autowired
     private AclCustomerService memberService;
-
-//    @PostMapping("send")
-//    public R demo(@RequestBody demo Demo){
-//        System.out.println(Demo.getOperate());
-//        return R.ok();
-//    }
 
     //登录
     @PostMapping("login")

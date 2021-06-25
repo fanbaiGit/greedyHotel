@@ -20,7 +20,7 @@ import java.util.List;
  * @since 2021-05-24
  */
 @RestController
-@RequestMapping("/admin")
+@RequestMapping("/useservice/admin")
 @CrossOrigin
 public class RoomController {
 
