@@ -44,6 +44,21 @@ public class Log implements Serializable {
     @TableField("wind_speed")
     private String windSpeed;
 
+    @TableField(exist = false)
+    private String time;
+
+    @TableField(exist = false)
+    private Integer num;
+
+    @TableField(exist = false)
+    private Integer highNum;
+
+    @TableField(exist = false)
+    private Integer midNum;
+
+    @TableField(exist = false)
+    private Integer lowNum;
+
     public Log(String room_id, Integer op, String ws){
         this.roomId= room_id;
         this.operation = op;

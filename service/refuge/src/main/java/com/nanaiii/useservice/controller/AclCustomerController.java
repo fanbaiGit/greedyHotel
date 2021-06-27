@@ -26,7 +26,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/useservice/customer")
-@CrossOrigin
+//@CrossOrigin
 public class AclCustomerController {
 
     @Autowired
@@ -45,6 +45,8 @@ public class AclCustomerController {
         QueryWrapper<Room> wrapper = new QueryWrapper<>();
         wrapper.eq("room_id",room_id);
         Room room = roomService.getOne(wrapper);
+
+        roomService.shutdown2python(room_id);
         if(room.getState()!=0){
             room.setState(0);
             roomService.update(room,wrapper);
@@ -57,6 +59,7 @@ public class AclCustomerController {
         {
             return R.error().data("meg","空调已关闭");
         }
+//        return R.ok().data("meg","已成功发送请求");
     }
 
     @ApiOperation("查询空调使用情况")
@@ -76,22 +79,10 @@ public class AclCustomerController {
         Room room = roomService.getOne(wrapper);
 
         if(room.getState()==0){
-//             log记录不在此处添加，如果同意送风再添加.此处只为Demo处使用。
-            // TODO 此处需要优先级调度
-            Boolean isOk = roomService.isOk(room_id,room.getWindSpeed());
-            System.out.println("\n\nIn requestOn isOK:"+isOk+"\n\n");
-            if (isOk){
-                if(room.getTarTemp()>25){room.setState(2);}
-                else{room.setState(1);}
-                roomService.update(room,wrapper);
-                Log log =new Log(room_id,1,room.getWindSpeed());
-                logService.save(log);
-                return R.ok().data("meg","空调成功开启");
-            }
-            else {
-                return R.ok().data("meg","请稍后重试");
-            }
-
+            if(room.getTarTemp()>25){room.setState(2);}
+            else{room.setState(1);}
+            roomService.op2python(room);
+            return R.ok().data("meg","成功发送");
         }
         else {
             return R.error().data("meg","空调已开启");
@@ -108,17 +99,14 @@ public class AclCustomerController {
             return R.error().data("meg","空调已关机");
         }
         room.setTarTemp(temperature);
-        if (temperature>25){
-            room.setState(2);
-        }
-        else if (temperature<25){
+        if (temperature<=25){
             room.setState(1);
         }
-        else {
-            room.setState(0);
+        else if (temperature>25){
+            room.setState(2);
         }
-        roomService.update(room,wrapper);
-        return R.ok();
+        roomService.op2python(room);
+        return R.ok().data("meg","成功发送");
     }
 
     @ApiOperation("调整风速")
@@ -126,72 +114,81 @@ public class AclCustomerController {
     public R changeFanSpeed(@PathVariable String room_id,@PathVariable String wind_speed){
         QueryWrapper<Room> wrapper = new QueryWrapper<>();
         wrapper.eq("room_id",room_id);
-        Room room=roomService.getOne(wrapper);
+        Room room=roomService.getOne(wrapper);        // 先停止上一次送风服务再请求开启下一次服务
         room.setWindSpeed(wind_speed);
+
         if(room.getState()==0){
             return R.error().data("meg","空调已关机");
         }
-
-        // 先停止上一次送风服务再请求开启下一次服务
+        roomService.op2python(room);
         Log log1 = new Log(room_id,0,null);
         room.setState(0);
         roomService.update(room,wrapper);
         logService.save(log1);
+        room.setWindSpeed(wind_speed);
+
+        return R.ok().data("meg","成功发送");
 
         // TODO 此处需要优先级调度
-        Boolean isOk = roomService.isOk(room_id,wind_speed);
-        System.out.println("\n\nIn changeFanSpeed isOK:"+isOk+"\n\n");
-        if(isOk){
-            room.setWindSpeed(wind_speed);
-            roomService.update(room,wrapper);
-            Log log = new Log(room_id,1,wind_speed);
-            logService.save(log);
-            return R.ok().data("meg","成功调整风速");
-        }
-        else{
-            roomService.update(room,wrapper);
-            return R.error().data("meg","请稍后重试");
-        }
+//        Boolean isOk = roomService.isOk(room_id,wind_speed);
+//        System.out.println("\n\nIn changeFanSpeed isOK:"+isOk+"\n\n");
+//        if(isOk){
+//            room.setWindSpeed(wind_speed);
+//            roomService.update(room,wrapper);
+//            Log log = new Log(room_id,1,wind_speed);
+//            logService.save(log);
+//            return R.ok().data("meg","成功调整风速");
+//        }
+//        else{
+//            roomService.update(room,wrapper);
+//            return R.error().data("meg","请稍后重试");
+//        }
     }
 
     @ApiOperation("查询请求是否可用")
     @PostMapping("isAvailable")
-    public R isAvailable(String room_id,String wind_speed){
-        Boolean isOk = roomService.isOk(room_id,wind_speed);
-        System.out.println("\n\nIn isAvailable isOK:"+isOk+"\n\n");
-        QueryWrapper<Room> wrapper = new QueryWrapper<>();
-        wrapper.eq("room_id",room_id);
-        Room room = roomService.getOne(wrapper);
-        if(isOk){
-            if(room.getState()!=0){//正在运行的空调检查状态
-                return R.ok().data("meg","继续运行");
-            }
-            else {
-                if (room.getTarTemp()>25){
-                    room.setState(2);
-                }
-                else if (room.getTarTemp()<25){
-                    room.setState(1);
-                }
-                Log log = new Log(room_id,2,wind_speed);
-                logService.save(log);
-                roomService.update(room,wrapper);
-                return R.ok().data("meg","可以开始运行");
-            }
+    public R isAvailable(String room_id){
+        Room newRoom = roomService.python2java(room_id);
+        if(newRoom!=null){
+            QueryWrapper<Room> wrapper = new QueryWrapper<>();
+            wrapper.eq("room_id",room_id);
+            Room oldRoom = roomService.getOne(wrapper);
+            roomService.update(newRoom,wrapper);
+            logService.addNewLog(newRoom,oldRoom);
         }
-        else {
-            if(room.getState()!=0){//正在运行的空调检查状态
-                room.setState(0);
-                Log log = new Log(room_id,0,null);
-                logService.save(log);
-                roomService.update(room,wrapper);
-                return R.ok().data("meg","中止运行");
-            }
-            else {
-                return R.error().data("meg","请稍后重试");
-            }
-        }
-
+//        Room oldRoom = roomService.getOne(wrapper);
+//        if (!newRoom.getState().equals(oldRoom.getState())||!newRoom.getNowWindSpeed().equals(oldRoom.getNowWindSpeed())||!newRoom.get)
+//
+//
+//            if(room.getState()!=0){//正在运行的空调检查状态
+//                return R.ok().data("meg","继续运行");
+//            }
+//            else {
+//                if (room.getTarTemp()>25){
+//                    room.setState(2);
+//                }
+//                else if (room.getTarTemp()<25){
+//                    room.setState(1);
+//                }
+//                Log log = new Log(room_id,2,wind_speed);
+//                logService.save(log);
+//                roomService.update(room,wrapper);
+//                return R.ok().data("meg","可以开始运行");
+//            }
+//        }
+//        else {
+//            if(room.getState()!=0){//正在运行的空调检查状态
+//                room.setState(0);
+//                Log log = new Log(room_id,0,null);
+//                logService.save(log);
+//                roomService.update(room,wrapper);
+//                return R.ok().data("meg","中止运行");
+//            }
+//            else {
+//                return R.error().data("meg","请稍后重试");
+//            }
+//        }
+        return R.ok().data("room",newRoom);
     }
 }
 

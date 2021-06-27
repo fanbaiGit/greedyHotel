@@ -2,27 +2,31 @@ package com.nanaiii.useservice.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.nanaiii.commonutils.R;
+import com.nanaiii.useservice.entity.AclCustomer;
 import com.nanaiii.useservice.entity.Airconditioning;
+import com.nanaiii.useservice.entity.Log;
 import com.nanaiii.useservice.entity.Room;
+import com.nanaiii.useservice.service.AclCustomerService;
+import com.nanaiii.useservice.service.LogService;
 import com.nanaiii.useservice.service.RoomService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 /**
  * <p>
- *  前端控制器
+ * 会员表 前端控制器
  * </p>
  *
  * @author nanaiii
  * @since 2021-05-24
  */
 @RestController
-@RequestMapping("/useservice/admin")
-//@CrossOrigin
-public class RoomController {
+@RequestMapping("/useservice/customer")
+public class AirconditionController {
 
     @Autowired
     private RoomService roomService;
@@ -49,10 +53,7 @@ public class RoomController {
         airconditioning.setState(1);
         airconditioning.setDefaultRoomNum(defaultRoomNum);
         airconditioning.setAvoidTime(avoidTime);
-
         return R.ok();
     }
 
-
 }
-

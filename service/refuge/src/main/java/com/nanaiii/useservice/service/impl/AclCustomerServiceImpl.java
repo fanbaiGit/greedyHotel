@@ -42,7 +42,7 @@ public class AclCustomerServiceImpl extends ServiceImpl<AclCustomerMapper, AclCu
         member.setRoomId(room_id);
         member.setMobile(mobile);
         member.setPassword(MD5.encrypt(mobile));//密码需要加密的
-        member.setIsDisabled(is_disabled);//新用户禁用
+        member.setIsDisabled(is_disabled);
         member.setAvatar("http://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83eoj0hHXhgJNOTSOFsS4uZs8x1ConecaVOB8eIl115xmJZcT4oCicvia7wMEufibKtTLqiaJeanU2Lpg3w/132");
         baseMapper.insert(member);
     }

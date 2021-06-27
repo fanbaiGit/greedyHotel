@@ -26,7 +26,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/aclservice/user")
-@CrossOrigin
+//@CrossOrigin
 public class AclUserController {
 
     @Autowired

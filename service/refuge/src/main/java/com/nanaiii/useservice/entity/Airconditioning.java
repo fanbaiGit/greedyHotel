@@ -1,16 +1,11 @@
 package com.nanaiii.useservice.entity;
 
-import com.baomidou.mybatisplus.annotation.*;
-
-import java.util.Date;
-
-import java.io.Serializable;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
+@EqualsAndHashCode(callSuper = false)
+@Accessors(chain = true)
 @Data
 public class Airconditioning {
 
@@ -35,4 +30,20 @@ public class Airconditioning {
     private int avoidTime;
 
     private int state;
+
+    public Airconditioning() {}
+
+    public Airconditioning(int defaultRoomTemp, int tempHighLimit, int tempLowLimit, int defaultTargetTemp, double feeRateHigh, double feeRateMiddle, double feeRateLow, String defaultFunSpeed, int defaultRoomNum, int avoidTime, int state) {
+        this.defaultRoomTemp = defaultRoomTemp;
+        this.tempHighLimit = tempHighLimit;
+        this.tempLowLimit = tempLowLimit;
+        this.defaultTargetTemp = defaultTargetTemp;
+        this.feeRateHigh = feeRateHigh;
+        this.feeRateMiddle = feeRateMiddle;
+        this.feeRateLow = feeRateLow;
+        this.defaultFunSpeed = defaultFunSpeed;
+        this.defaultRoomNum = defaultRoomNum;
+        this.avoidTime = avoidTime;
+        this.state = state;
+    }
 }

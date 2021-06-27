@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/aclservice/customer")
-@CrossOrigin
+//@CrossOrigin
 public class AclCustomerController {
 
     @Autowired

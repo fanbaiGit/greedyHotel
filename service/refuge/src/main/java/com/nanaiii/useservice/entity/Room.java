@@ -44,4 +44,8 @@ public class Room implements Serializable {
 
     @TableField("tar_temp")
     private Double tarTemp;
+
+    @TableField(exist = false)
+    private Double val;
+
 }

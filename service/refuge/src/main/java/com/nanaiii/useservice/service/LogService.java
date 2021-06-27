@@ -2,6 +2,7 @@ package com.nanaiii.useservice.service;
 
 import com.nanaiii.useservice.entity.Log;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.nanaiii.useservice.entity.Room;
 
 import java.util.List;
 
@@ -15,5 +16,7 @@ import java.util.List;
  */
 public interface LogService extends IService<Log> {
 
-    double getVal(List<Log> logList);
+    double getVal(List<Log> logList,long endTime);
+
+    void addNewLog(Room newRoom, Room oldRoom);
 }
