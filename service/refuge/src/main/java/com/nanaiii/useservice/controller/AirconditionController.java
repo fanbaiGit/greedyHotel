@@ -2,12 +2,9 @@ package com.nanaiii.useservice.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.nanaiii.commonutils.R;
-import com.nanaiii.useservice.entity.AclCustomer;
 import com.nanaiii.useservice.entity.Airconditioning;
-import com.nanaiii.useservice.entity.Log;
 import com.nanaiii.useservice.entity.Room;
-import com.nanaiii.useservice.service.AclCustomerService;
-import com.nanaiii.useservice.service.LogService;
+import com.nanaiii.useservice.service.AirconditionService;
 import com.nanaiii.useservice.service.RoomService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,11 +22,14 @@ import java.util.List;
  * @since 2021-05-24
  */
 @RestController
-@RequestMapping("/useservice/customer")
+@RequestMapping("/useservice/aircondition")
 public class AirconditionController {
 
     @Autowired
     private RoomService roomService;
+
+    @Autowired
+    private AirconditionService airconditionService;
 
     @ApiOperation("获得所有房间空调使用情况")
     @GetMapping("getAllRoom")
@@ -48,12 +48,15 @@ public class AirconditionController {
     }
 
     @PostMapping("powerOn")
-    public R powerOn(int defaultRoomNum,int avoidTime){
+    public R powerOn(int defaultRoomNum,double avoidTime,String defaultFunSpeed,int defaultTargetTemp){
         Airconditioning airconditioning = new Airconditioning();
         airconditioning.setState(1);
         airconditioning.setDefaultRoomNum(defaultRoomNum);
         airconditioning.setAvoidTime(avoidTime);
-        return R.ok();
+        airconditioning.setDefaultFunSpeed(defaultFunSpeed);
+        airconditioning.setDefaultRoomTemp(defaultTargetTemp);
+        airconditionService.startAircondition(airconditioning);
+        return R.ok().data("meg","中央空调已开机");
     }
 
 }

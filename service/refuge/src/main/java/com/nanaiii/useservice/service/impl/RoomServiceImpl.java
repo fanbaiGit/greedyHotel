@@ -27,21 +27,10 @@ import java.util.*;
 @Service
 public class RoomServiceImpl extends ServiceImpl<RoomMapper, Room> implements RoomService {
 
-    @Override
-    public Double getRoomTemp(Room room) {
-        // TODO 计算房间现在的温度
-        return 25.0;
-    }
-
-    @Override
-    public Boolean isOk(String room_id, String wind_speed) {
-        Random r = new Random();
-        return r.nextDouble()>=0.7;
-    }
 
     @Override
     public void op2python(Room room) {
-        System.out.println("\njson:"+JSON.toJSONString(room));
+        System.out.println("\njson IN op2python:"+JSON.toJSONString(room));
         try {
             URL url = new URL("http://127.0.0.1:5000/op");// 创建连接
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -58,7 +47,7 @@ public class RoomServiceImpl extends ServiceImpl<RoomMapper, Room> implements Ro
             out.append(JSON.toJSONString(room));
             out.flush();
             out.close();
-            System.out.println("out:"+out);
+//            System.out.println("out:"+out);
 
             int code = connection.getResponseCode();
             InputStream is = null;
@@ -80,7 +69,7 @@ public class RoomServiceImpl extends ServiceImpl<RoomMapper, Room> implements Ro
                     destPos += readLen;
                 }
                 String result = new String(data, "UTF-8"); // utf-8编码
-                System.out.println("result in jsonPost: "+result);
+//                System.out.println("result in op2python: "+result);
             }
 
         } catch (IOException e) {
@@ -90,7 +79,7 @@ public class RoomServiceImpl extends ServiceImpl<RoomMapper, Room> implements Ro
 
     @Override
     public void shutdown2python(String room_id) {
-//        System.out.println("\n\n"+JSON.toJSONString(room));
+        System.out.println("\nJson IN shutdown2python:"+JSON.toJSONString(room_id));
         try {
             URL url = new URL("http://127.0.0.1:5000/shutdown");// 创建连接
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -128,7 +117,7 @@ public class RoomServiceImpl extends ServiceImpl<RoomMapper, Room> implements Ro
                     destPos += readLen;
                 }
                 String result = new String(data, "UTF-8"); // utf-8编码
-                System.out.println("result in jsonPost: "+result);
+//                System.out.println("result in jsonPost: "+result);
             }
 
         } catch (IOException e) {
@@ -175,31 +164,30 @@ public class RoomServiceImpl extends ServiceImpl<RoomMapper, Room> implements Ro
                     destPos += readLen;
                 }
                 String result = new String(data, "UTF-8"); // utf-8编码
-                System.out.println("\nresult in python2java: "+result);
 
                 if(!result.equals("ohh")) {
+                    System.out.println("\nJson in python2java: " + JSONObject.parseObject(result));
                     JSONObject jsonObject = JSONObject.parseObject(result);
-//                    System.out.println(jsonObject.getString("roomId"));
                     Room room = new Room();
-                    if(jsonObject.getInteger("state")!=0){
-                        if(jsonObject.getDouble("tarTemp")>25)
-                            room.setState(2);
-                        else if(jsonObject.getDouble("tarTemp")<=25)
-                            room.setState(1);
-                    }
-                    else
-                        room.setState(0);
-                    System.out.println("\nadjvbuab: "+room.getState()+"\n");
-                    room.setNowTemp(jsonObject.getDouble("nowTemp"));
+//                    if(jsonObject.getInteger("state")!=0){
+//                        if(jsonObject.getDouble("tarTemp")>25)
+//                            room.setState(2);
+//                        else if(jsonObject.getDouble("tarTemp")<=25)
+//                            room.setState(1);
+//                    }
+//                    else
+//                        room.setState(0);
                     room.setRoomId(jsonObject.getString("roomId"));
+                    room.setState(jsonObject.getInteger("state"));
+                    room.setNowTemp(jsonObject.getDouble("nowTemp"));
+                    room.setTarTemp(jsonObject.getDouble("tarTemp"));
                     room.setWindSpeed(jsonObject.getString("windSpeed"));
                     room.setIsDisabled(jsonObject.getBoolean("isDisabled"));
-                    room.setTarTemp(jsonObject.getDouble("tarTemp"));
 
                     return room;
                 }
                 else{
-//                    System.out.println(result);
+                    System.out.println("\nJson in python2java: " + result);
                     return null;
                 }
             }

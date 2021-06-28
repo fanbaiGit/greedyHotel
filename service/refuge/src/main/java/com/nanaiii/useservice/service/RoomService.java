@@ -13,10 +13,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface RoomService extends IService<Room> {
 
-    Double getRoomTemp(Room room);
-
-    Boolean isOk(String room_id, String wind_speed);
-
     void op2python(Room room);
 
     void shutdown2python(String room_id);

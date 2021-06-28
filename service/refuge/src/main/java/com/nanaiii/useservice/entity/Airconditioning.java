@@ -27,13 +27,13 @@ public class Airconditioning {
 
     private int defaultRoomNum;
 
-    private int avoidTime;
+    private double avoidTime;
 
     private int state;
 
     public Airconditioning() {}
 
-    public Airconditioning(int defaultRoomTemp, int tempHighLimit, int tempLowLimit, int defaultTargetTemp, double feeRateHigh, double feeRateMiddle, double feeRateLow, String defaultFunSpeed, int defaultRoomNum, int avoidTime, int state) {
+    public Airconditioning(int defaultRoomTemp, int tempHighLimit, int tempLowLimit, int defaultTargetTemp, double feeRateHigh, double feeRateMiddle, double feeRateLow, String defaultFunSpeed, int defaultRoomNum, double avoidTime, int state) {
         this.defaultRoomTemp = defaultRoomTemp;
         this.tempHighLimit = tempHighLimit;
         this.tempLowLimit = tempLowLimit;

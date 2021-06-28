@@ -12,4 +12,5 @@ import com.nanaiii.useservice.entity.Airconditioning;
  * @since 2021-05-24
  */
 public interface AirconditionService extends IService<Airconditioning>{
+    void startAircondition(Airconditioning airconditioning);
 }
