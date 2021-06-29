@@ -48,10 +48,13 @@ public class AclCustomerController {
         QueryWrapper<Room> wrapper = new QueryWrapper<>();
         wrapper.eq("room_id",room_id);
         Room room = roomService.python2java(room_id);
+        if(room == null){
+            room = roomService.getOne(wrapper);
+        }
+        room.setState(0);
 
         roomService.shutdown2python(room_id);
 //        if(room.getState()!=0){
-        room.setState(0);
         roomService.update(room,wrapper);
 
         // TODO 这里的log是否加到addnewlog中
@@ -78,7 +81,7 @@ public class AclCustomerController {
         if(room.getState()==0){
             if(room.getTarTemp()>25){room.setState(2);}
             else{room.setState(1);}
-//            roomService.op2python(room);
+            roomService.op2python(room);
             return R.ok().data("meg","成功发送");
         }
         else {

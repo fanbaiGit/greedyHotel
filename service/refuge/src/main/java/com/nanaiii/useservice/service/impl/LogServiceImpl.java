@@ -29,8 +29,8 @@ public class LogServiceImpl extends ServiceImpl<LogMapper, Log> implements LogSe
         long lastTime = 0;
 
         for (Log i : logList) {
-            System.out.println(cost);
-            System.out.println(val);
+//            System.out.println(cost);
+//            System.out.println(val);
             switch (i.getOperation()) {
                 case 0:
                     now = i.getOpTime().getTime();

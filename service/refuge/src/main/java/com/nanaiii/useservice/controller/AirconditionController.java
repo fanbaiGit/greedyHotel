@@ -48,11 +48,12 @@ public class AirconditionController {
     }
 
     @PostMapping("powerOn")
-    public R powerOn(int defaultRoomNum,double avoidTime,String defaultFunSpeed,int defaultTargetTemp){
+    public R powerOn(int defaultRoomNum,double avoidTime,int timeSlice,String defaultFunSpeed,int defaultTargetTemp){
         Airconditioning airconditioning = new Airconditioning();
         airconditioning.setState(1);
         airconditioning.setDefaultRoomNum(defaultRoomNum);
         airconditioning.setAvoidTime(avoidTime);
+        airconditioning.setTimeSlice(timeSlice);
         airconditioning.setDefaultFunSpeed(defaultFunSpeed);
         airconditioning.setDefaultRoomTemp(defaultTargetTemp);
         airconditionService.startAircondition(airconditioning);
