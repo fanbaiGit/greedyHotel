@@ -14,6 +14,8 @@ public class Report {
 
     private Integer highNum;
 
+    private Double income;
+
     public Report(String startTime, Integer num, Integer lowNum, Integer midNum, Integer highNum) {
         this.time = startTime;
         this.customerNum = num;

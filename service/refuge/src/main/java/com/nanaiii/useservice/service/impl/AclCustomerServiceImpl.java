@@ -2,6 +2,7 @@ package com.nanaiii.useservice.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.nanaiii.commonutils.MD5;
+import com.nanaiii.commonutils.R;
 import com.nanaiii.servicebase.exceptionhandler.NanaiiiException;
 import com.nanaiii.useservice.entity.AclCustomer;
 import com.nanaiii.useservice.mapper.AclCustomerMapper;
@@ -9,6 +10,8 @@ import com.nanaiii.useservice.service.AclCustomerService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+
+import javax.annotation.Resource;
 
 /**
  * <p>
@@ -46,4 +49,24 @@ public class AclCustomerServiceImpl extends ServiceImpl<AclCustomerMapper, AclCu
         member.setAvatar("http://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83eoj0hHXhgJNOTSOFsS4uZs8x1ConecaVOB8eIl115xmJZcT4oCicvia7wMEufibKtTLqiaJeanU2Lpg3w/132");
         baseMapper.insert(member);
     }
+
+    @Resource
+    private AclCustomerMapper aclCustomerMapper;
+
+    @Override
+    public AclCustomer findByRoom(String room_id){
+        QueryWrapper<AclCustomer> wrapper = new QueryWrapper<>();
+        //查询目标房间当前住户
+        wrapper.eq("room_id", room_id)
+                .eq("is_disabled", 0)
+                .orderByDesc("gmt_modified");
+        return aclCustomerMapper.selectOne(wrapper);
+    }
+
+    @Override
+    public AclCustomer login(AclCustomer member) {
+        return null;
+    }
+
+
 }

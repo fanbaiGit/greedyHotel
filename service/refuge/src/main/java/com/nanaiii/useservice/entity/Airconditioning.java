@@ -35,4 +35,17 @@ public class Airconditioning {
 
     public Airconditioning() {}
 
+    public Airconditioning(int defaultRoomTemp, int tempHighLimit, int tempLowLimit, int defaultTargetTemp, double feeRateHigh, double feeRateMiddle, double feeRateLow, String defaultFunSpeed, int defaultRoomNum, double avoidTime, int state) {
+        this.defaultRoomTemp = defaultRoomTemp;
+        this.tempHighLimit = tempHighLimit;
+        this.tempLowLimit = tempLowLimit;
+        this.defaultTargetTemp = defaultTargetTemp;
+        this.feeRateHigh = feeRateHigh;
+        this.feeRateMiddle = feeRateMiddle;
+        this.feeRateLow = feeRateLow;
+        this.defaultFunSpeed = defaultFunSpeed;
+        this.defaultRoomNum = defaultRoomNum;
+        this.avoidTime = avoidTime;
+        this.state = state;
+    }
 }

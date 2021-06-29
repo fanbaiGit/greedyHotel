@@ -23,10 +23,23 @@ import java.util.List;
 @RequestMapping("/useservice/admin")
 //@CrossOrigin
 public class RoomController {
-//
-//    @Autowired
-//    private RoomService roomService;
-//
+
+    @Autowired
+    private RoomService roomService;
+
+    @PostMapping("defaultTemp")
+    public R setDefault(String roomId, Double temp){
+        QueryWrapper<Room> wrapper = new QueryWrapper<>();
+        wrapper.eq("room_id",roomId);
+        Room room = roomService.getOne(wrapper);
+        if (room == null){
+            return R.error().data("msg","房间不存在");
+        }
+        room.setDefaultTemp(temp);
+        roomService.update(room,wrapper);
+        return R.ok();
+    }
+
 //    @ApiOperation("获得所有房间空调使用情况")
 //    @GetMapping("getAllRoom")
 //    public R getAllRoom(){
@@ -52,5 +65,6 @@ public class RoomController {
 //
 //        return R.ok();
 //    }
+
 }
 

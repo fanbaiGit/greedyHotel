@@ -25,7 +25,6 @@ public class CodeGenerator {
         GlobalConfig gc = new GlobalConfig();
         String projectPath = System.getProperty("user.dir");
 
-        // TODO 添加路径
         gc.setOutputDir("E:\\Git\\JAVA\\greedyHotel\\service\\refuge" + "/src/main/java");
 
 
@@ -54,7 +53,6 @@ public class CodeGenerator {
         // 4、包配置
         PackageConfig pc = new PackageConfig();
 
-        // TODO 添加模块名
         pc.setModuleName("useservice");
 
 
@@ -71,7 +69,6 @@ public class CodeGenerator {
         StrategyConfig strategy = new StrategyConfig();
 
 //        strategy.setInclude("tbcell","tbprb","tbc2i","tbatuhandover","tbcellkpi","tbhandover","tboptcell");
-        // TODO 添加库
         strategy.setInclude("log");
 
 

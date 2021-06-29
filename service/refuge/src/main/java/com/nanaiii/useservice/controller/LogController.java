@@ -12,12 +12,13 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.DataTruncation;
 import java.text.ParseException;
 import java.util.*;
 
 /**
  * <p>
- *  前端控制器
+ * 前端控制器
  * </p>
  *
  * @author nanaiii
@@ -40,43 +41,31 @@ public class LogController {
     @ApiOperation("查询详单")
     @PostMapping("createrdr")
     public R createrdr(String room_id, int settime, String start, String end) {
-        //确定当前客户
-        QueryWrapper<AclCustomer> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("room_id", room_id)
-                .eq("is_disabled", 0)
-                .orderByDesc("gmt_modified");
-        AclCustomer customer = aclCustomerService.getOne(queryWrapper);
+        //查询目标房间当前住户
+        AclCustomer customer = aclCustomerService.findByRoom(room_id);
         if (customer == null) {
             return R.error().data("meg", "无匹配客户");
         }
-
-        QueryWrapper<Log> wrapper = new QueryWrapper<>();
-        wrapper.eq("room_id", room_id)
-                .ge("op_time", customer.getGmtModified().getTime());
-        List<Log> logList = logService.list(wrapper);
+        //查询该住户详单
+        List<Log> logList = logService.listByCustomer(room_id, customer);
         return R.ok().data("logList", logList);
     }
 
     @ApiOperation("查询账单")
     @PostMapping("createinvoice")
     public R createinvoice(String room_id, int settime, String start, String end) {
-        //确定当前客户
-        QueryWrapper<AclCustomer> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("room_id", room_id)
-                .eq("is_disabled", 0)
-                .orderByDesc("gmt_modified");
-        AclCustomer customer = aclCustomerService.getOne(queryWrapper);
+        //查询目标房间当前住户
+        AclCustomer customer = aclCustomerService.findByRoom(room_id);
         if (customer == null) {
             return R.error().data("meg", "无匹配客户");
         }
-
-        QueryWrapper<Log> wrapper = new QueryWrapper<>();
-        wrapper.eq("room_id", room_id)
-                .ge("op_time", customer.getGmtModified());
-        List<Log> logList = logService.list(wrapper);
-        double val = logService.getVal(logList, (new Date()).getTime());
-
-        Bill bill = new Bill(customer.getGmtModified().toString(), new Date().toString(), room_id, customer.getMobile(), val);
+        //查询该住户详单
+        List<Log> logList = logService.listByCustomer(room_id, customer);
+        //计算消费金额
+        Date date = new Date();
+        double val = logService.calcFee(logList, date.getTime());
+        //生成账单
+        Bill bill = new Bill(customer.getGmtModified().toString(), date.toString(), room_id, customer.getMobile(), val);
         return R.ok().data("bill", bill);
     }
 
@@ -114,6 +103,9 @@ public class LogController {
         wrapper1.eq("room_id", room_id);
         Room room = roomService.getOne(wrapper1);
         room.setIsDisabled(false);
+        room.setNowTemp(room.getDefaultTemp());
+        room.setWindSpeed("MIDDLE");
+        room.setTarTemp(25.0);
         roomService.update(room, wrapper1);
 
         // 新加入住记录
@@ -187,50 +179,74 @@ public class LogController {
     @ApiOperation("格式化报表")
     @GetMapping("report")
     public R report(String startTime, String endTime, Integer grain) throws ParseException {
-        QueryWrapper<Log> queryWrapper = new QueryWrapper<>();
-        queryWrapper.between("op_time", startTime, endTime);
-        //grain 0日报，1周报，2月报
-        List<Report> reportList = new ArrayList<>();
-        if (grain == 0) {
-            queryWrapper.select("date_format(op_time,'%Y-%m-%d') as time",
-                    "count(operation=2 or null) as num",
-                    "count(wind_speed='LOW' or null) as lowNum",
-                    "count(wind_speed='MIDDLE' or null) as midNum",
-                    "count(wind_speed='HIGH' or null) as highNum")
-                    .groupBy("date_format(op_time,'%Y-%m-%d')");
-            List<Log> logList = logService.list(queryWrapper);
-
-            for (Log log : logList) {
-                Report report = new Report(log.getTime(), log.getNum(), log.getLowNum(), log.getMidNum(), log.getHighNum());
-                reportList.add(report);
-            }
-        } else if (grain == 1) {
-            queryWrapper.select("date_format(op_time,'%Y-%u') as time",
-                    "count(operation=2 or null) as num",
-                    "count(wind_speed='LOW' or null) as lowNum",
-                    "count(wind_speed='MIDDLE' or null) as midNum",
-                    "count(wind_speed='HIGH' or null) as highNum")
-                    .groupBy("date_format(op_time,'%Y-%u')");
-            List<Log> logList = logService.list(queryWrapper);
-
-            for (Log log : logList) {
-                Report report = new Report(log.getTime(), log.getNum(), log.getLowNum(), log.getMidNum(), log.getHighNum());
-                reportList.add(report);
-            }
-        } else if (grain == 2) {
-            queryWrapper.select("date_format(op_time,'%Y-%m') as time",
-                    "count(operation=2 or null) as num",
-                    "count(wind_speed='LOW' or null) as lowNum",
-                    "count(wind_speed='MIDDLE' or null) as midNum",
-                    "count(wind_speed='HIGH' or null) as highNum")
-                    .groupBy("date_format(op_time,'%Y-%m')");
-            List<Log> logList = logService.list(queryWrapper);
-            for (Log log : logList) {
-                Report report = new Report(log.getTime(), log.getNum(), log.getLowNum(), log.getMidNum(), log.getHighNum());
-                reportList.add(report);
-            }
-        }
-
+//        QueryWrapper<Log> queryWrapper = new QueryWrapper<>();
+//        queryWrapper.between("op_time", startTime, endTime);
+//        //grain 0日报，1周报，2月报
+//        List<Report> reportList = new ArrayList<>();
+//        if (grain == 0) {
+//            queryWrapper.select("date_format(op_time,'%Y-%m-%d') as time",
+//                    "count(operation=2 or null) as num",
+//                    "count(wind_speed='LOW' or null) as lowNum",
+//                    "count(wind_speed='MIDDLE' or null) as midNum",
+//                    "count(wind_speed='HIGH' or null) as highNum")
+//                    .groupBy("date_format(op_time,'%Y-%m-%d')");
+//            List<Log> logList = logService.list(queryWrapper);
+//
+//            List<Room> roomList = roomService.list(null);
+//            List<String> roomIdList = new ArrayList<>();
+//            for (Room room : roomList) {
+//                roomIdList.add(room.getRoomId());
+//            }
+//
+//            List<Double> feeList = new ArrayList<>();
+//
+//            for (Log log : logList) {
+//                double val = 0;
+//                for (String roomId : roomIdList) {
+//                    QueryWrapper<Log> queryWrapper1 = new QueryWrapper<>();
+//                    queryWrapper1.eq("room_id", roomId)
+//                            .ge("op_time", log.getTime());
+//                    List<Log> dayLogList = logService.list(queryWrapper1);
+//                    val += logService.getVal(dayLogList, new Date().getTime());
+//                }
+//                feeList.add(val);
+//                Report report = new Report(log.getTime(), log.getNum(), log.getLowNum(), log.getMidNum(), log.getHighNum());
+//                reportList.add(report);
+//            }
+//
+//            int size = reportList.size();
+//            reportList.get(size - 1).setIncome(feeList.get(size - 1));
+//            for (int i = 0; i < size - 1; i++) {
+//                reportList.get(i).setIncome(feeList.get(i) - feeList.get(i + 1));
+//            }
+//
+//        } else if (grain == 1) {
+//            queryWrapper.select("date_format(op_time,'%Y-%u') as time",
+//                    "count(operation=2 or null) as num",
+//                    "count(wind_speed='LOW' or null) as lowNum",
+//                    "count(wind_speed='MIDDLE' or null) as midNum",
+//                    "count(wind_speed='HIGH' or null) as highNum")
+//                    .groupBy("date_format(op_time,'%Y-%u')");
+//            List<Log> logList = logService.list(queryWrapper);
+//
+//            for (Log log : logList) {
+//                Report report = new Report(log.getTime(), log.getNum(), log.getLowNum(), log.getMidNum(), log.getHighNum());
+//                reportList.add(report);
+//            }
+//        } else if (grain == 2) {
+//            queryWrapper.select("date_format(op_time,'%Y-%m') as time",
+//                    "count(operation=2 or null) as num",
+//                    "count(wind_speed='LOW' or null) as lowNum",
+//                    "count(wind_speed='MIDDLE' or null) as midNum",
+//                    "count(wind_speed='HIGH' or null) as highNum")
+//                    .groupBy("date_format(op_time,'%Y-%m')");
+//            List<Log> logList = logService.list(queryWrapper);
+//            for (Log log : logList) {
+//                Report report = new Report(log.getTime(), log.getNum(), log.getLowNum(), log.getMidNum(), log.getHighNum());
+//                reportList.add(report);
+//            }
+//        }
+        List<Report> reportList = logService.createReport(startTime,endTime,grain);
         return R.ok().data("reportList", reportList);
     }
 

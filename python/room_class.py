@@ -2,7 +2,7 @@ import time
 
 
 class client():
-    def __init__(self, room_id, wind_speed, target_tp, mode, dftmp, now_tp):
+    def __init__(self, room_id, wind_speed, target_tp, mode, now_tp, dftmp):
         self.id = room_id
         self.wind_speed = wind_speed
         self.busy = False
@@ -12,8 +12,12 @@ class client():
         self.now_tp = now_tp
         self.is_runable = True
         self.mode = mode
-        self.sec = 30
-        self.interval = 5
+        if dftmp > target_tp:
+            self.action = "DOWN"
+        else:
+            self.action = "UP"
+        self.sec = 60
+        self.interval = 1
         self.defaulttemp = dftmp
 
     def run(self):
@@ -53,9 +57,11 @@ class client():
                 delta = 0.4
 
             if self.target_tp < self.now_tp:
+                self.action = "DOWN"
                 self.now_tp -= delta / self.sec * self.interval  # 现在的温度
                 #print("update temp line60")
             elif self.target_tp > self.now_tp:
+                self.action = "UP"
                 self.now_tp += delta / self.sec * self.interval
                 #print("update temp line63")
             else:
@@ -63,13 +69,14 @@ class client():
 
             print(self.id, "'s current temperature is", self.now_tp)
             print(self.id, "'s target temperature is", self.target_tp)
+
             #到达目标温度，停机
-            if self.mode == "HOT" and self.now_tp >= self.target_tp:
+            if self.action == "UP" and self.now_tp >= self.target_tp:
                 print(self.id,
                       "'s temperature is higher than its target, stops")
                 self.is_runable = False
                 self.wait()
-            elif self.mode == "COLD" and self.target_tp >= self.now_tp:
+            elif self.action == "DOWN" and self.target_tp >= self.now_tp:
                 print(self.id,
                       "'s temperature is lower than its target, stops")
                 self.is_runable = False
@@ -78,9 +85,11 @@ class client():
 
         else:  #把温度自然地往默认度靠拢
             if self.defaulttemp < self.now_tp:
+                self.action = "DOWN"
                 self.now_tp -= 0.5 / self.sec * self.interval  # 现在的温度
                 #print("update temp line87")
             elif self.defaulttemp > self.now_tp:
+                self.action = "UP"
                 self.now_tp += 0.5 / self.sec * self.interval
                 #print("update temp line90")
             else:
@@ -90,16 +99,19 @@ class client():
             print(self.id, "'s target is ", self.target_tp)
 
             #超过目标温度一度，允许被调度
-            if (self.mode == "COLD" and self.now_tp - self.target_tp >= 1) or (
-                    self.mode == "HOT" and self.target_tp - self.now_tp >= 1):
+            if (self.action == "UP" and self.now_tp - self.target_tp >= 1) or (
+                    self.action == "DOWN"
+                    and self.target_tp - self.now_tp >= 1):
                 self.is_runable = True
                 print(self.id, " is allowed to be scheduled")
 
         #结算完当前状态后，再修改属性
         if wind_speed is not None:
             self.wind_speed = wind_speed
+            self.is_runable = True
         if tar_temp is not None:
             self.target_tp = tar_temp
+            self.is_runable = True
         if mode is not None:
             self.mode = mode
 

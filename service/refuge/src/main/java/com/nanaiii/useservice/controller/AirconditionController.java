@@ -48,14 +48,14 @@ public class AirconditionController {
     }
 
     @PostMapping("powerOn")
-    public R powerOn(int defaultRoomNum,double avoidTime,int timeSlice,String defaultFunSpeed,int defaultTargetTemp){
+    public R powerOn(int defaultRoomNum,double avoidTime,String defaultFunSpeed,int defaultTargetTemp,int timeSlice){
         Airconditioning airconditioning = new Airconditioning();
         airconditioning.setState(1);
         airconditioning.setDefaultRoomNum(defaultRoomNum);
         airconditioning.setAvoidTime(avoidTime);
-        airconditioning.setTimeSlice(timeSlice);
         airconditioning.setDefaultFunSpeed(defaultFunSpeed);
         airconditioning.setDefaultRoomTemp(defaultTargetTemp);
+        airconditioning.setTimeSlice(timeSlice);
         airconditionService.startAircondition(airconditioning);
         return R.ok().data("meg","中央空调已开机");
     }
